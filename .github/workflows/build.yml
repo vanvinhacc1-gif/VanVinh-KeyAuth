@@ -1,0 +1,17 @@
+name: Build-Dylib-VanVinh
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Arm64 Dylib
+        run: |
+          clang++ -dynamiclib -framework Foundation -framework UIKit \
+          -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) \
+          main.cpp -o VanVinh.dylib
+      - name: Upload Product
+        uses: actions/upload-artifact@v3
+        with:
+          name: VanVinh-Dylib
+          path: VanVinh.dylib
