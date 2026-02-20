@@ -1,8 +1,6 @@
-#include <Foundation/Foundation.h>
-#include <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #include <string>
-
-// Thong so KeyAuth cua may
 std::string name = "Free Fire"; 
 std::string ownerid = "gnIVuUid3U";
 std::string secret = "d5b933c3de31702c49156c02f6096e8e8da83375d1a02baf1dba0f3928eb2777";
