@@ -4,11 +4,11 @@ jobs:
   check-code:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Compile
         run: clang++ -dynamiclib -framework Foundation -framework UIKit -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) main.cpp -o app.dat
       - name: Save
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Data-Result
           path: app.dat
