@@ -1,4 +1,4 @@
-ame: Test-App
+name: Test-App
 on: [push]
 jobs:
   check-code:
