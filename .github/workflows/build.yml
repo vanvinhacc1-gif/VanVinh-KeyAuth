@@ -10,5 +10,5 @@ jobs:
       - name: Save
         uses: actions/upload-artifact@v3
         with:
-          name: VanVinh-Dylib
+          name: dylib
           path: VanVinh.dylib
