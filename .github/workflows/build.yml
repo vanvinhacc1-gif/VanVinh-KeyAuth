@@ -1,4 +1,4 @@
-name: Build-Dylib
+name: Build
 on: [push]
 jobs:
   build:
@@ -6,10 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Compile
-        run: |
-          clang++ -dynamiclib -framework Foundation -framework UIKit \
-          -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) \
-          main.cpp -o VanVinh.dylib
+        run: clang++ -dynamiclib -framework Foundation -framework UIKit -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) main.cpp -o VanVinh.dylib
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
