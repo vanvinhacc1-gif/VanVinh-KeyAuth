@@ -1,14 +1,14 @@
-name: Build
+name: Test
 on: [push]
 jobs:
-  build:
+  check:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build
-        run: clang++ -dynamiclib -framework Foundation -framework UIKit -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) main.cpp -o VanVinh.dylib
-      - name: Save
+      - name: Compile
+        run: clang++ -dynamiclib -framework Foundation -framework UIKit -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) main.cpp -o mylib.dat
+      - name: Export
         uses: actions/upload-artifact@v3
         with:
-          name: dylib
-          path: VanVinh.dylib
+          name: Result
+          path: mylib.dat
