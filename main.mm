@@ -8,41 +8,33 @@
 void showLogin() {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"XÁC THỰC CUỐI CÙNG" message:@"Nhập Key để kiểm tra hạn dùng" preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH - VER 2.0" 
+                                                                       message:@"HỆ THỐNG ĐÃ RESET - NHẬP KEY" 
+                                                                preferredStyle:UIAlertControllerStyleAlert];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Key..."; }];
         
-        [alert addAction:[UIAlertAction actionWithTitle:@"Kích Hoạt" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"Đăng Nhập" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             NSString *key = alert.textFields.firstObject.text;
-            NSString *url = [NSString stringWithFormat:@"https://keyauth.win/api/1.2/?type=login&name=%@&ownerid=%@&secret=%@&key=%@", KH_NAME, KH_OWNERID, KH_SECRET, key];
+            // DÙNG VER 2.0 ĐỂ KHỚP VỚI DASHBOARD
+            NSString *url = [NSString stringWithFormat:@"https://keyauth.win/api/1.2/?type=login&name=%@&ownerid=%@&secret=%@&key=%@&ver=2.0", KH_NAME, KH_OWNERID, KH_SECRET, key];
             
             [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData *data, NSURLResponse *res, NSError *err) {
                 if (data) {
                     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-                    // LẤY TRỰC TIẾP SỐ NGÀY CÒN LẠI TỪ SERVER
-                    id info = [json objectForKey:@"info"];
-                    if (info && [info isKindOfClass:[NSDictionary class]]) {
-                        NSArray *subscriptions = [info objectForKey:@"subscriptions"];
-                        if (subscriptions.count > 0) {
-                            long long expiry = [[subscriptions[0] objectForKey:@"expiry"] longLongValue];
-                            long long now = (long long)[[NSDate date] timeIntervalSince1970];
-                            
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                // TỰ SO SÁNH: NẾU THỜI GIAN HẾT HẠN NHỎ HƠN THỜI GIAN HIỆN TẠI -> CÚT
-                                if (expiry > now) {
-                                    UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"Hợp Lệ" message:@"Chào VanVinh, mời vào game!" preferredStyle:UIAlertControllerStyleAlert];
-                                    [ok addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-                                    [window.rootViewController presentViewController:ok animated:YES completion:nil];
-                                } else {
-                                    UIAlertController *no = [UIAlertController alertControllerWithTitle:@"HẾT HẠN" message:@"Key này đã hết thời gian sử dụng!" preferredStyle:UIAlertControllerStyleAlert];
-                                    [no addAction:[UIAlertAction actionWithTitle:@"Thoát" style:UIAlertActionStyleDestructive handler:^(id a){ showLogin(); }]];
-                                    [window.rootViewController presentViewController:no animated:YES completion:nil];
-                                }
-                            });
-                            return;
-                        }
-                    }
+                    BOOL success = [[json objectForKey:@"success"] boolValue];
+                    NSString *msg = [[json objectForKey:@"message"] lowercaseString];
+                    
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        showLogin(); // Sai key hoặc lỗi info thì bắt nhập lại
+                        // CHẶN NGAY NẾU SUCCESS=FALSE HOẶC MESSAGE CÓ CHỮ "EXPIRED"
+                        if (success && ![msg containsString:@"expired"]) {
+                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"Thành Công" message:@"Chào VanVinh, mời vào game!" preferredStyle:UIAlertControllerStyleAlert];
+                            [ok addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+                            [window.rootViewController presentViewController:ok animated:YES completion:nil];
+                        } else {
+                            UIAlertController *no = [UIAlertController alertControllerWithTitle:@"TỪ CHỐI" message:@"Key sai hoặc đã hết hạn!" preferredStyle:UIAlertControllerStyleAlert];
+                            [no addAction:[UIAlertAction actionWithTitle:@"Thử lại" style:UIAlertActionStyleDestructive handler:^(id a){ showLogin(); }]];
+                            [window.rootViewController presentViewController:no animated:YES completion:nil];
+                        }
                     });
                 }
             }] resume];
