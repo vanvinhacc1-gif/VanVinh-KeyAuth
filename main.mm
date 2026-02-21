@@ -2,35 +2,41 @@
 #import <UIKit/UIKit.h>
 #include <dlfcn.h>
 
-// QUAN TRỌNG: Mày phải dán Link RAW từ Gist vào đây
-#define LINK_GIST_RAW @"DÁN_LINK_RAW_CỦA_MÀY_VÀO_ĐÂY"
+//https://raw.githubusercontent.com/vanvinhacc1-gif/VanVinh-KeyAuth/refs/heads/main/danh_sach_key.txt
+#define LINK_SERVER @"https://raw.githubusercontent.com/vanvinhacc1-gif/VanVinh-KeyAuth/main/danh_sach_key.txt"
 
 void showLogin() {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH VIP" 
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH PRIVATE" 
                                                                        message:@"HỆ THỐNG KEY RIÊNG" 
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Nhập Key (VinhiOS)..."; }];
+        [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Nhập Key của đại ca..."; }];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"Kích Hoạt" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             NSString *input = [alert.textFields.firstObject.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             
-            [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:LINK_GIST_RAW] completionHandler:^(NSData *data, NSURLResponse *res, NSError *err) {
+            [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:LINK_SERVER] completionHandler:^(NSData *data, NSURLResponse *res, NSError *err) {
                 if (data) {
-                    NSString *serverKey = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                    serverKey = [serverKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                    
+                    NSString *allKeys = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                    NSArray *keyArray = [allKeys componentsSeparatedByString:@"\n"];
+                    __block BOOL check = NO;
+                    for (NSString *key in keyArray) {
+                        NSString *cleanKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                        if ([input isEqualToString:cleanKey] && ![input isEqualToString:@""]) {
+                            check = YES; break;
+                        }
+                    }
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        if ([input isEqualToString:serverKey] && ![input isEqualToString:@""]) {
-                            // LOAD MENU MOD (Đúng tên file mày nhúng trong ESign)
+                        if (check) {
+                            // LOAD MENU MOD (Phải trùng tên file mày nhúng trong ESign)
                             dlopen([[NSString stringWithFormat:@"%@/aimkill Lol.dylib", [[NSBundle mainBundle] bundlePath]] UTF8String], RTLD_NOW);
                             
-                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"THÀNH CÔNG" message:@"Chào đại ca Vinh!" preferredStyle:UIAlertControllerStyleAlert];
+                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"OK" message:@"Chào đại ca Vinh!" preferredStyle:UIAlertControllerStyleAlert];
                             [ok addAction:[UIAlertAction actionWithTitle:@"Vào" style:UIAlertActionStyleDefault handler:nil]];
                             [window.rootViewController presentViewController:ok animated:YES completion:nil];
                         } else {
-                            showLogin(); // Sai key hiện lại bảng nhập
+                            showLogin(); // Sai key hiện lại bảng login
                         }
                     });
                 }
