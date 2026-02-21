@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#include <dlfcn.h> // Thư viện để gọi file dylib khác
 
 #define KH_NAME    @"VanVinhiOS" 
 #define KH_OWNERID @"gnIVuUid3U"
@@ -8,14 +9,11 @@
 void showLogin() {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH - VER 2.0" 
-                                                                       message:@"HỆ THỐNG ĐÃ RESET - NHẬP KEY" 
-                                                                preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH - VER 2.0" message:@"NHẬP KEY ĐỂ MỞ MENU HACK" preferredStyle:UIAlertControllerStyleAlert];
         [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Key..."; }];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"Đăng Nhập" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             NSString *key = alert.textFields.firstObject.text;
-            // DÙNG VER 2.0 ĐỂ KHỚP VỚI DASHBOARD
             NSString *url = [NSString stringWithFormat:@"https://keyauth.win/api/1.2/?type=login&name=%@&ownerid=%@&secret=%@&key=%@&ver=2.0", KH_NAME, KH_OWNERID, KH_SECRET, key];
             
             [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData *data, NSURLResponse *res, NSError *err) {
@@ -25,15 +23,18 @@ void showLogin() {
                     NSString *msg = [[json objectForKey:@"message"] lowercaseString];
                     
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        // CHẶN NGAY NẾU SUCCESS=FALSE HOẶC MESSAGE CÓ CHỮ "EXPIRED"
                         if (success && ![msg containsString:@"expired"]) {
-                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"Thành Công" message:@"Chào VanVinh, mời vào game!" preferredStyle:UIAlertControllerStyleAlert];
+                            
+                            // === ĐÂY LÀ CHỖ QUAN TRỌNG: GỌI MENU MOD ===
+                            // Nó sẽ load file có tên là MenuMod.dylib nằm trong thư mục App
+                            dlopen([[NSString stringWithFormat:@"%@/MenuMod.dylib", [[NSBundle mainBundle] bundlePath]] UTF8String], RTLD_NOW);
+                            
+                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"Thành Công" message:@"Menu Mod đã được kích hoạt!" preferredStyle:UIAlertControllerStyleAlert];
                             [ok addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                             [window.rootViewController presentViewController:ok animated:YES completion:nil];
                         } else {
-                            UIAlertController *no = [UIAlertController alertControllerWithTitle:@"TỪ CHỐI" message:@"Key sai hoặc đã hết hạn!" preferredStyle:UIAlertControllerStyleAlert];
-                            [no addAction:[UIAlertAction actionWithTitle:@"Thử lại" style:UIAlertActionStyleDestructive handler:^(id a){ showLogin(); }]];
-                            [window.rootViewController presentViewController:no animated:YES completion:nil];
+                            // Hiện bảng từ chối nếu key sai hoặc hết hạn
+                            showLogin(); 
                         }
                     });
                 }
