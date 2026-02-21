@@ -2,16 +2,16 @@
 #import <UIKit/UIKit.h>
 #include <dlfcn.h>
 
-// SỬA TÊN ỨNG DỤNG KHỚP 100% VỚI DASHBOARD
-#define KH_NAME    @"Free Fire" 
+// SỬA TÊN ỨNG DỤNG THÀNH SHADOWROCKET ĐỂ KHỚP VỚI APP TEST
+#define KH_NAME    @"Shadowrocket" 
 #define KH_OWNERID @"gnIVuUid3U"
 #define KH_SECRET  @"d5b933c3de31702c49156093845b42699e19e71935e4e899666f7f631626210b"
 
-// Hàm đổi thời gian từ giây sang định dạng dễ đọc
+// Hàm tính thời gian còn lại
 NSString* timeRemaining(long long expiry) {
     long long now = (long long)[[NSDate date] timeIntervalSince1970];
     long long diff = expiry - now;
-    if (diff <= 0) return @"Đã hết hạn";
+    if (diff <= 0) return @"Hết hạn";
     long days = diff / 86400;
     long hours = (diff % 86400) / 3600;
     long mins = (diff % 3600) / 60;
@@ -21,10 +21,10 @@ NSString* timeRemaining(long long expiry) {
 void showLogin() {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"XÁC THỰC VAN VINH" 
-                                                                       message:@"NHẬP KEY ĐỂ MỞ MENU" 
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"VAN VINH - TEST" 
+                                                                       message:@"KIỂM TRA TRÊN SHADOWROCKET" 
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Dán Key vào đây..."; }];
+        [alert addTextFieldWithConfigurationHandler:^(UITextField *t){ t.placeholder=@"Nhập Key..."; }];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"Kích Hoạt" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             NSString *rawKey = alert.textFields.firstObject.text;
@@ -35,7 +35,7 @@ void showLogin() {
                 return;
             }
 
-            // Gửi yêu cầu với ver 2.0 đã lưu trên web
+            // Gửi yêu cầu với tên Shadowrocket và Ver 2.0
             NSString *url = [NSString stringWithFormat:@"https://keyauth.win/api/1.2/?type=login&name=%@&ownerid=%@&secret=%@&key=%@&ver=2.0", 
                             [KH_NAME stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]], 
                             KH_OWNERID, KH_SECRET, rawKey];
@@ -52,16 +52,17 @@ void showLogin() {
                             NSArray *subs = [info objectForKey:@"subscriptions"];
                             long long expiry = [[subs[0] objectForKey:@"expiry"] longLongValue];
                             
-                            // LOAD FILE MENU TRONG THƯ MỤC APP
+                            // LOAD FILE MENU NẰM TRONG SHADOWROCKET.APP
                             dlopen([[NSString stringWithFormat:@"%@/aimkill Lol.dylib", [[NSBundle mainBundle] bundlePath]] UTF8String], RTLD_NOW);
                             
-                            NSString *msg = [NSString stringWithFormat:@"Chào mừng VanVinh!\nHạn dùng: %@", timeRemaining(expiry)];
-                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"THÀNH CÔNG" message:msg preferredStyle:UIAlertControllerStyleAlert];
-                            [ok addAction:[UIAlertAction actionWithTitle:@"Vào Game" style:UIAlertActionStyleDefault handler:nil]];
+                            UIAlertController *ok = [UIAlertController alertControllerWithTitle:@"THÀNH CÔNG" 
+                                                                                       message:[NSString stringWithFormat:@"Hạn dùng: %@", timeRemaining(expiry)] 
+                                                                                preferredStyle:UIAlertControllerStyleAlert];
+                            [ok addAction:[UIAlertAction actionWithTitle:@"Vào App" style:UIAlertActionStyleDefault handler:nil]];
                             [window.rootViewController presentViewController:ok animated:YES completion:nil];
                         } else {
                             // Hiện bảng lỗi truy cập
-                            UIAlertController *no = [UIAlertController alertControllerWithTitle:@"TỪ CHỐI" message:@"Key không tồn tại hoặc đã hết hạn!" preferredStyle:UIAlertControllerStyleAlert];
+                            UIAlertController *no = [UIAlertController alertControllerWithTitle:@"TỪ CHỐI" message:@"Key không khớp với ứng dụng này!" preferredStyle:UIAlertControllerStyleAlert];
                             [no addAction:[UIAlertAction actionWithTitle:@"Thử lại" style:UIAlertActionStyleDestructive handler:^(id a){ showLogin(); }]];
                             [window.rootViewController presentViewController:no animated:YES completion:nil];
                         }
